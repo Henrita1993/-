@@ -1,7 +1,7 @@
 import React,{Component} from 'react';
 import {BrowserRouter,Switch,Route} from "react-router-dom"
-import Login from "./pages/login/login.jsx"
-import Admin from "./pages/admin/admin.jsx"
+import Login from "./containers/login/login.jsx"
+import Admin from "./containers/admin/admin.jsx"
 // import { Button } from "antd"
 // import { Button, Tooltip } from 'antd';
 // import { SearchOutlined } from '@ant-design/icons';
@@ -17,7 +17,6 @@ export default class App extends Component {
       <Route path="/" component={Login}/> 
       <Route path="/admin" component={Admin}/>
       </Switch>
-     
       </BrowserRouter>
     )
   }

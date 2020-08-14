@@ -1,17 +1,25 @@
 import React,{Component} from "react"
 import { Form, Input, Button, Checkbox } from 'antd'
+import {connect} from "react-redux"
+import {createDemo1Aciton,createDemo2Aciton} from "../../redux/action_creators/test_action.js"
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import "./login.less"
 import logo from "./imgs/logo.png"
 const Item = Form.Item
 
 
-export default class Login extends Component{
+ class Login extends Component{
+  componentDidMount(){
+    console.log(this.props);
+    console.log(this.form);
+
+}
   handleSubmit=()=>{
   console.log("i submit")
   }
  
   render () {
+
     // 得到组件值
       const onFinish = values => {
         console.log('Received values of form: ', values);
@@ -100,3 +108,12 @@ export default class Login extends Component{
   }
 
 }
+// connect直接使用state里数据
+export default connect(
+  state => ({demo:state.test}),
+  {
+    demo1:createDemo1Aciton,
+    demo2:createDemo2Aciton
+  }
+)(Login)
+
