@@ -1,29 +1,71 @@
 import React,{Component} from "react"
-import { Form, Input, Button, Checkbox } from 'antd'
+import { Form, Input, Button, Checkbox ,message} from 'antd'
 import {connect} from "react-redux"
-import {createDemo1Aciton,createDemo2Aciton} from "../../redux/action_creators/test_action.js"
+import {Redirect} from 'react-router-dom';
+// 容器组件只要引用action即可
+import {saveUserInfoAction} from "../../redux/action_creators/login_action.js"
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import "./login.less"
-import logo from "./imgs/logo.png"
+import logo from "../../assets/images/logo.png"
+import {reqLogin} from "../../api/index"
+import memoryUtils from '../../utils/memoryUtils';
+import storageUtils from '../../utils/storageUtils';
 const Item = Form.Item
 
 
  class Login extends Component{
   componentDidMount(){
     console.log(this.props);
-    console.log(this.form);
 
-}
-  handleSubmit=()=>{
-  console.log("i submit")
-  }
+   }
+   
  
   render () {
 
-    // 得到组件值
-      const onFinish = values => {
-        console.log('Received values of form: ', values);
-      };
+    // 表单提交成功与否得到的promise对象
+
+    const onFinish = async(values) => {
+      const {username,password} = values
+      console.log(values)
+
+      // 发起登录请求,await得到promise对象 
+      let result= await reqLogin(username,password)
+      console.log("请求成功返回结果：",result);
+      const {status,msg}=result
+      //请求成功
+      if(status === 0){
+        const user = result.data
+        console.log("返回的user",user)
+        // 保存user到local
+        memoryUtils.user= user
+        console.log("local里的",memoryUtils.user)
+
+        
+        //通过storageUtils将user保存到store里面
+        storageUtils.saveUser(user)
+        console.log("response success");
+        message.success("登录成功",2)
+         // 服务器返回的数据交给redux保管
+         this.props.saveUserInfo(user)
+        // 转到admin页面
+        this.props.history.replace("/admin")
+      }else{
+        // const {msg}=result.data
+        message.warning(msg,1)
+      }
+     
+    };
+
+    // 若本身已登录状态，保持登录样子
+    if(memoryUtils.user&&memoryUtils.user._id){
+      return <Redirect to="/admin"/>
+    }
+
+
+  // 表单提交失败，数据从表单出去失败
+    const onFinishFailed = errorInfo => {
+      message.error("表单输入有误，请重新输入",2)
+    };
 
     return (
       <div className="login">
@@ -35,12 +77,14 @@ const Item = Form.Item
 
         <section className="content">
         <h3>用户登录</h3>
+
         <Form name="normal_login" 
         className="login-form"   
         initialValues={{
           remember: true,
         }}
-        onFinish={onFinish}
+       onFinish={onFinish}
+       onFinishFailed={onFinishFailed}
         >
           <Item 
           name="username"
@@ -110,10 +154,10 @@ const Item = Form.Item
 }
 // connect直接使用state里数据
 export default connect(
-  state => ({demo:state.test}),
+  state => ({}),
   {
-    demo1:createDemo1Aciton,
-    demo2:createDemo2Aciton
+    saveUserInfo:saveUserInfoAction
+
   }
 )(Login)
 
